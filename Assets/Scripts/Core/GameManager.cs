@@ -29,8 +29,20 @@ public class GameManager : MonoBehaviour
         }
 
         GridManager.Instance.Init(_currentLevelConfig);
+        SpawnProps();
         SetupCamera();
         SpawnPlayer();
+    }
+
+    private void SpawnProps()
+    {
+        if (PropManager.Instance == null)
+        {
+            Debug.LogWarning("[GameManager] PropManager instance not found. Props will not be spawned.");
+            return;
+        }
+
+        PropManager.Instance.SpawnProps(_currentLevelConfig);
     }
 
     private void SpawnPlayer()

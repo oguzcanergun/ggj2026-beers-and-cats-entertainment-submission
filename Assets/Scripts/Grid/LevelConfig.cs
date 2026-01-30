@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "LevelConfig", menuName = "Game/Level Config")]
@@ -13,10 +14,14 @@ public class LevelConfig : ScriptableObject
     [Header("Player")]
     [SerializeField] private Vector2Int _playerStartingCoordinates;
 
+    [Header("Props")]
+    [SerializeField] private List<PropData> _props;
+
     public int GridWidth => _gridWidth;
     public int GridHeight => _gridHeight;
     public float CellSize => _cellSize;
     public float CellSpacing => _cellSpacing;
     public Vector3 GridOrigin => _gridOrigin;
     public Vector2Int PlayerStartingCoordinates => _playerStartingCoordinates;
+    public IReadOnlyList<PropData> Props => _props;
 }

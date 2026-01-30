@@ -44,6 +44,7 @@
   - `CellSpacing` (float, default 0.5)
   - `GridOrigin` (Vector3)
   - `PlayerStartingCoordinates` (Vector2Int)
+  - `Props` (List<PropData>) - props to spawn on this level
 
 ---
 
@@ -57,9 +58,10 @@
 - `Player` - reference to spawned player instance (read-only)
 - On Start:
   1. Calls `GridManager.Instance.Init(_currentLevelConfig)`
-  2. Positions camera X/Y to center on grid (keeps Z)
-  3. Sets orthographic size to fit grid
-  4. Spawns player at `LevelConfig.PlayerStartingCoordinates`
+  2. Calls `PropManager.Instance.SpawnProps(_currentLevelConfig)`
+  3. Positions camera X/Y to center on grid (keeps Z)
+  4. Sets orthographic size to fit grid
+  5. Spawns player at `LevelConfig.PlayerStartingCoordinates`
 
 ---
 
@@ -67,10 +69,12 @@
 
 #### Character.cs (Abstract Base Class)
 - `CurrentCoordinates` - current grid position (read-only)
+- `IsMoving` - true while tweening between cells
 - `Grid` - protected reference to grid instance
+- `_moveDuration` - serialized, default 0.1s (snappy)
 - `Initialize(Vector2Int startingCoordinates)` - virtual, sets up grid reference and position
-- `TryMove(Vector2Int direction)` - protected, validates and moves to target cell, returns bool
-- `SetPosition(Vector2Int coordinates)` - protected, sets coordinates and world position
+- `TryMove(Vector2Int direction)` - protected, validates and tweens to target cell (DOTween), returns bool
+- `SetPositionImmediate(Vector2Int coordinates)` - protected, sets position instantly
 
 #### Player.cs (Derives from Character)
 - Handles WASD + Arrow key input in Update()
@@ -79,6 +83,28 @@
 #### AICharacter.cs (Derives from Character)
 - Base class for AI-controlled characters
 - AI behavior to be implemented
+
+---
+
+### Props System (`Assets/Scripts/Props/`)
+
+#### PropType.cs (Enum)
+- `Table` - first prop type
+
+#### PropData.cs (Serializable Class)
+- `Type` (PropType)
+- `Coordinates` (Vector2Int) - bottom-left corner
+- `Size` (Vector2Int) - width x height, default (1,1)
+
+#### Prop.cs (MonoBehaviour)
+- `Type`, `Coordinates`, `Size` - read-only properties
+- `Initialize(PropData, Grid)` - marks occupied cells as unwalkable, positions at center
+
+#### PropManager.cs (MonoBehaviour Singleton)
+- `Instance` - static singleton reference
+- `_propPrefabs` - list of PropType → Prefab mappings
+- `SpawnProps(LevelConfig)` - spawns all props from config
+- `ClearProps()` - destroys spawned props
 
 ---
 
@@ -98,9 +124,11 @@ CellCenter(x,y) = Origin + (x * CellStride + CellSize/2, y * CellStride + CellSi
 
 ## Scene Setup Requirements
 1. GameObject with `GridManager` component (assign cell prefab)
-2. GameObject with `GameManager` component (assign LevelConfig + player prefab)
-3. Camera set to Orthographic
-4. Player prefab with `Player` component (spawned automatically by GameManager)
+2. GameObject with `PropManager` component (assign prop prefabs)
+3. GameObject with `GameManager` component (assign LevelConfig + player prefab)
+4. Camera set to Orthographic
+5. Player prefab with `Player` component (spawned automatically by GameManager)
+6. Prop prefabs with `Prop` component
 
 ---
 
@@ -114,6 +142,11 @@ Assets/
 │   │   └── AICharacter.cs
 │   ├── Core/
 │   │   └── GameManager.cs
+│   ├── Props/
+│   │   ├── PropType.cs
+│   │   ├── PropData.cs
+│   │   ├── Prop.cs
+│   │   └── PropManager.cs
 │   └── Grid/
 │       ├── Cell.cs
 │       ├── Grid.cs

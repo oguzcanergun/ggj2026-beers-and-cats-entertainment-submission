@@ -18,3 +18,7 @@ MonoBehaviour:
   _cellSpacing: 0.5
   _gridOrigin: {x: 0, y: 0, z: 0}
   _playerStartingCoordinates: {x: 0, y: 0}
+  _props:
+  - Type: 0
+    Coordinates: {x: 3, y: 3}
+    Size: {x: 2, y: 2}
