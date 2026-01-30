@@ -1,84 +1,91 @@
 using UnityEngine;
-using Game.Grid;
 
-namespace Game.Core
+public class GameManager : MonoBehaviour
 {
-    public class GameManager : MonoBehaviour
+    [SerializeField] private LevelConfig _currentLevelConfig;
+    [SerializeField] private Camera _mainCamera;
+    [SerializeField] private float _cameraPadding = 1f;
+    [SerializeField] private Player _playerPrefab;
+
+    public Player Player { get; private set; }
+
+    private void Start()
     {
-        [SerializeField] private LevelConfig _currentLevelConfig;
-        [SerializeField] private Camera _mainCamera;
-        [SerializeField] private float _cameraPadding = 1f;
+        InitializeGame();
+    }
 
-        private void Start()
+    private void InitializeGame()
+    {
+        if (_currentLevelConfig == null)
         {
-            InitializeGame();
+            Debug.LogWarning("[GameManager] No LevelConfig assigned. Grid will not be initialized.");
+            return;
         }
 
-        private void InitializeGame()
+        if (GridManager.Instance == null)
         {
-            if (_currentLevelConfig == null)
-            {
-                Debug.LogWarning("[GameManager] No LevelConfig assigned. Grid will not be initialized.");
-                return;
-            }
-
-            if (GridManager.Instance == null)
-            {
-                Debug.LogError("[GameManager] GridManager instance not found. Make sure GridManager is in the scene.");
-                return;
-            }
-
-            GridManager.Instance.Init(_currentLevelConfig);
-            SetupCamera();
+            Debug.LogError("[GameManager] GridManager instance not found. Make sure GridManager is in the scene.");
+            return;
         }
 
-        private void SetupCamera()
+        GridManager.Instance.Init(_currentLevelConfig);
+        SetupCamera();
+        SpawnPlayer();
+    }
+
+    private void SpawnPlayer()
+    {
+        if (_playerPrefab == null)
         {
-            if (_mainCamera == null)
-            {
-                _mainCamera = Camera.main;
-            }
-
-            if (_mainCamera == null)
-            {
-                Debug.LogWarning("[GameManager] No camera found. Camera setup skipped.");
-                return;
-            }
-
-            var grid = GridManager.Instance.Grid;
-            float gridWorldWidth = grid.GetTotalWidth();
-            float gridWorldHeight = grid.GetTotalHeight();
-
-            // Center of the grid (XY plane)
-            float centerX = grid.Origin.x + gridWorldWidth * 0.5f;
-            float centerY = grid.Origin.y + gridWorldHeight * 0.5f;
-
-            // Position camera X and Y to center on grid, keep Z
-            var camPos = _mainCamera.transform.position;
-            _mainCamera.transform.position = new Vector3(centerX, centerY, camPos.z);
-
-            // Set orthographic size to fit the grid
-            if (_mainCamera.orthographic)
-            {
-                float screenAspect = (float)Screen.width / Screen.height;
-                float gridAspect = gridWorldWidth / gridWorldHeight;
-
-                float orthoSize;
-                if (gridAspect > screenAspect)
-                {
-                    // Grid is wider than screen - fit by width
-                    orthoSize = (gridWorldWidth / screenAspect) * 0.5f;
-                }
-                else
-                {
-                    // Grid is taller than screen - fit by height
-                    orthoSize = gridWorldHeight * 0.5f;
-                }
-
-                _mainCamera.orthographicSize = orthoSize + _cameraPadding;
-            }
-
-            Debug.Log($"[GameManager] Camera positioned at center of {gridWorldWidth}x{gridWorldHeight} grid");
+            Debug.LogWarning("[GameManager] No player prefab assigned. Player will not be spawned.");
+            return;
         }
+
+        Player = Instantiate(_playerPrefab);
+        Player.Initialize(_currentLevelConfig.PlayerStartingCoordinates);
+    }
+
+    private void SetupCamera()
+    {
+        if (_mainCamera == null)
+        {
+            _mainCamera = Camera.main;
+        }
+
+        if (_mainCamera == null)
+        {
+            Debug.LogWarning("[GameManager] No camera found. Camera setup skipped.");
+            return;
+        }
+
+        var grid = GridManager.Instance.Grid;
+        float gridWorldWidth = grid.GetTotalWidth();
+        float gridWorldHeight = grid.GetTotalHeight();
+
+        float centerX = grid.Origin.x + gridWorldWidth * 0.5f;
+        float centerY = grid.Origin.y + gridWorldHeight * 0.5f;
+
+        var camPos = _mainCamera.transform.position;
+        _mainCamera.transform.position = new Vector3(centerX, centerY, camPos.z);
+
+        if (_mainCamera.orthographic)
+        {
+            float screenAspect = (float)Screen.width / Screen.height;
+            float gridAspect = gridWorldWidth / gridWorldHeight;
+
+            float orthoSize;
+            if (gridAspect > screenAspect)
+            {
+                orthoSize = (gridWorldWidth / screenAspect) * 0.5f;
+            }
+            else
+            {
+                orthoSize = gridWorldHeight * 0.5f;
+            }
+
+            _mainCamera.orthographicSize = orthoSize + _cameraPadding;
+        }
+
+        Debug.Log($"[GameManager] Camera positioned at center of {gridWorldWidth}x{gridWorldHeight} grid");
     }
 }

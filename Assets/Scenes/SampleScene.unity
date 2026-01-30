@@ -474,6 +474,7 @@ MonoBehaviour:
   _currentLevelConfig: {fileID: 11400000, guid: 21a400dd7205b495b9af94b8c88d45ad, type: 2}
   _mainCamera: {fileID: 330585545}
   _cameraPadding: 1
+  _playerPrefab: {fileID: 2813752673424844178, guid: ca95a41a787a6400899ad93ccb3df2c6, type: 3}
 --- !u!1 &2082917133
 GameObject:
   m_ObjectHideFlags: 0

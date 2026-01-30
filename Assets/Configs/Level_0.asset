@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd575947c68194a58a9304f230c4cbc0, type: 3}
   m_Name: Level_0
   m_EditorClassIdentifier: 
-  _gridWidth: 3
-  _gridHeight: 3
+  _gridWidth: 6
+  _gridHeight: 6
   _cellSize: 4
   _cellSpacing: 0.5
   _gridOrigin: {x: 0, y: 0, z: 0}
+  _playerStartingCoordinates: {x: 0, y: 0}
